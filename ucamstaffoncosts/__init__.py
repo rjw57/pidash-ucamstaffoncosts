@@ -23,8 +23,8 @@ __all__ = [
 
 
 def employment_expenditure_and_commitments(until_date, initial_grade, initial_point, scheme,
-                                           start_date=None, from_date=None, tax_year_start_month=4,
-                                           tax_year_start_day=6, **kwargs):
+                                           start_date=None, from_date=None, occupancy=1,
+                                           tax_year_start_month=4, tax_year_start_day=6, **kwargs):
     """
     Calculate the existing expenditure and remaining commitments for an employee's contract.
     Returns a pair giving the total commitment and a list of :py:class:`CommitmentExplanation`
@@ -34,6 +34,8 @@ def employment_expenditure_and_commitments(until_date, initial_grade, initial_po
         ``None``, today's date is used.
     :param start_date: date at which employee started. Results will be returned from this date. If
         ``None``, the "from date" is used.
+    :param occupancy: proportion of full-time this employee works
+    :type occupancy: :py:class:`numbers.Rational`
 
     Remaining keyword arguments are passed to :py:func:`costs_by_tax_year`.
 
@@ -66,6 +68,8 @@ def employment_expenditure_and_commitments(until_date, initial_grade, initial_po
     2016
 
     """
+    occupancy_fraction = fractions.Fraction(occupancy)
+
     from_date = from_date if from_date is not None else datetime.datetime.now().date()
     start_date = start_date if start_date is not None else from_date
 
@@ -106,7 +110,7 @@ def employment_expenditure_and_commitments(until_date, initial_grade, initial_po
             # how many days in this range?
             days = (salary_end_date - salary_start_date).days
             earnings_after_from_date += fractions.Fraction(
-                days * salary_start.base_salary, tax_year_days)
+                days * salary_start.base_salary, tax_year_days) * occupancy_fraction
         earnings_after_from_date = round(earnings_after_from_date)
         assert earnings_after_from_date >= 0
         assert earnings_after_from_date <= cost.salary
