@@ -370,6 +370,10 @@ def costs_by_tax_year(from_year, initial_grade, initial_point, scheme,
             until_date=to_date, next_anniversary_date=anniversary_date, **kwargs
         ))
 
+        # If there were no salaries, loop again to the next year
+        if len(salaries) == 0:
+            continue
+
         # Update initial grade and point for start of next year
         end_salary = salaries[-1]
         initial_grade, initial_point = end_salary.grade, end_salary.point
